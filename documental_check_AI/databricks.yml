@@ -1,0 +1,13 @@
+# This is a Databricks asset bundle definition for Check_Documentale.
+# The Databricks extension requires databricks.yml configuration file.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+
+bundle:
+  name: documental_check_ai # docai
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://...4.azuredatabricks.net

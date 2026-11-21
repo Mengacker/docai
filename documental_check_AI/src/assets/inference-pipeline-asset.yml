@@ -1,0 +1,127 @@
+# Workflow definition
+resources:
+  jobs:
+    master_creation_job:
+      name: mark_checkDoc_JOB
+      tags: ${var.my_tags}
+      email_notifications: ${var.email_settings}
+      parameters:
+        - name: env
+          default: ${bundle.target}
+        - name: snapshot_date
+          default: ${var.snapshot_date}
+        - name: is_cicd
+          default: "true"
+        - name: experiment_name
+          default: ${var.experiment_name}
+      trigger:
+        file_arrival:
+          url: ${var.job_trigger}
+      job_clusters:
+        - job_cluster_key: master_job_cluster_checkDoc
+          new_cluster: ${var.master_cluster}
+      tasks:
+        # 1. Ingestion
+        - task_key: Ingestion
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/Ingestion.py
+
+        # 2. Inference Master Creation CE and CGC
+        - task_key: InferenceMasterCreation_CE
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/MasterCreationInference_CE.py
+          depends_on:
+            - task_key: Ingestion
+
+        - task_key: InferenceMasterCreation_CGC
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/MasterCreationInference_CGC.py
+          depends_on:
+            - task_key: Ingestion
+
+        - task_key: InferenceMasterCreation_SR
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/MasterCreationInference_SR.py
+          depends_on:
+            - task_key: Ingestion
+
+        - task_key: InferenceMasterCreation_SS
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/MasterCreationInference_SS.py
+          depends_on:
+            - task_key: Ingestion
+
+        - task_key: InferenceMasterCreation_PC
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/MasterCreationInference_PC.py
+          depends_on:
+            - task_key: Ingestion
+        # 4. inference pipeline
+        - task_key: BatchInference_CE
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/ModelServing_CE.py
+            base_parameters:
+              product_name: CE
+          depends_on:
+            - task_key: InferenceMasterCreation_CE
+
+        - task_key: BatchInference_CGC
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/ModelServing_CGC.py
+            base_parameters:
+              product_name: CGC
+          depends_on:
+            - task_key: InferenceMasterCreation_CGC
+            - task_key: BatchInference_CE
+
+
+        - task_key: BatchInference_SR
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/ModelServing_SR.py
+            base_parameters:
+              product_name: SR
+          depends_on:
+            - task_key: InferenceMasterCreation_SR
+            - task_key: BatchInference_CGC
+
+
+        - task_key: BatchInference_SS
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/ModelServing_SS.py
+            base_parameters:
+              product_name: SS
+          depends_on:
+            - task_key: InferenceMasterCreation_SS
+            - task_key: BatchInference_SR
+
+
+        - task_key: BatchInference_PC
+          job_cluster_key: master_job_cluster_checkDoc
+          libraries: ${var.my_libraries}
+          notebook_task:
+            notebook_path: ../../notebooks/ModelServing_PC.py
+            base_parameters:
+              product_name: PC
+          depends_on:
+            - task_key: InferenceMasterCreation_PC
+            - task_key: BatchInference_SS

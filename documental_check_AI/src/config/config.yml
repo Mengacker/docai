@@ -1,0 +1,192 @@
+# ---------------------------------------------------------------------------- #
+#                          Datasets, paths and related                         #
+# ---------------------------------------------------------------------------- #
+ingestion:
+  partition_columns: [current_campaign , document_type]
+  table_format: DELTA_TABLE_FORMAT
+  catalog: sbx_catalog
+  schema: docai_schema
+  volume: docai_volume
+  table_ingestion: master_ingest
+  columns:
+    DATA_SNAPSHOT: date
+    macrosegmento: string
+    commodity: string
+    document_type: string
+    current_campaign: string
+    current_file_name: string
+    past_campaign: string
+    past_file_name: string
+
+master_creation:
+  partition_columns: [current_campaign , document_type]
+  table_format: DELTA_TABLE_FORMAT
+  catalog: sbx_catalog
+  schema: docai_schema
+  volume: docai_volume
+  table_inference: master_infer
+  columns_inference:
+    DATA_SNAPSHOT: date
+    macrosegmento: string
+    commodity: string
+    document_type: string
+    current_campaign: string
+    current_file_name: string
+    past_campaign: string
+    past_file_name: string
+    chunk: string
+    chunk_title: string
+    stop_words: map
+    extracted_chunk: string
+    extracted_chunk_clean: string
+    token_count: integer
+    chunk_check: boolean
+    tabella_valori: map
+    flg_serving: boolean
+  table_prediction: master_predict # finale master
+  columns_prediction:
+      DATA_SNAPSHOT: date
+      macrosegmento: string
+      commodity: string
+      document_type: string
+      current_campaign: string
+      current_file_name: string
+      past_campaign: string
+      past_file_name: string
+      chunk: string
+      chunk_title: string
+      stop_words: map
+      extracted_chunk: string
+      extracted_chunk_clean: string
+      token_count: integer
+      chunk_check: boolean
+      corresponding_contractual_paragraphs: map
+      comparison_lists: map
+      comparison: integer
+      summary: map
+      list_of_differences: map
+      num_paragraph: map
+  CE:
+    table_train: master_ce_train # training master
+    columns_training:
+      DATA_SNAPSHOT: date
+      macrosegmento: string
+      commodity: string
+      document_type: string
+      current_campaign: string
+      current_file_name: string
+      past_campaign: string
+      past_file_name: string
+      chunk: string
+      chunk_title: string
+      stop_words: map
+      extracted_chunk: string
+      extracted_chunk_clean: string
+      token_count: integer
+      chunk_check: boolean
+      corresponding_contractual_paragraphs: map
+      comparison_lists: map
+      comparison: integer
+      summary: map
+      list_of_differences: map
+      num_paragraph: map
+  CGC:
+    table_train: master_cgc_train # training master
+    columns:
+      DATA_SNAPSHOT: date
+      macrosegmento: string
+      commodity: string
+      document_type: string
+      current_campaign: string
+      current_file_name: string
+      past_campaign: string
+      past_file_name: string
+      chunk: string
+      chunk_title: string
+      stop_words: map
+      extracted_chunk: string
+      extracted_chunk_clean: string
+      token_count: integer
+      chunk_check: boolean
+      corresponding_contractual_paragraphs: map
+      comparison_lists: map
+      comparison: integer
+      summary: map
+      list_of_differences: map
+      num_paragraph: map
+  SR:
+    table_train: master_sr_train # training master
+    columns:
+      DATA_SNAPSHOT: date
+      macrosegmento: string
+      commodity: string
+      document_type: string
+      current_campaign: string
+      current_file_name: string
+      past_campaign: string
+      past_file_name: string
+      chunk: string
+      chunk_title: string
+      stop_words: map
+      extracted_chunk: string
+      extracted_chunk_clean: string
+      token_count: integer
+      chunk_check: boolean
+      corresponding_contractual_paragraphs: map
+      comparison_lists: map
+      comparison: integer
+      summary: map
+      list_of_differences: map
+      num_paragraph: map
+  SS:
+    table_train: master_ss_train # training master
+    columns:
+      DATA_SNAPSHOT: date
+      macrosegmento: string
+      commodity: string
+      document_type: string
+      current_campaign: string
+      current_file_name: string
+      past_campaign: string
+      past_file_name: string
+      chunk: string
+      chunk_title: string
+      stop_words: map
+      extracted_chunk: string
+      extracted_chunk_clean: string
+      token_count: integer
+      chunk_check: boolean
+      corresponding_contractual_paragraphs: map
+      comparison_lists: map
+      comparison: integer
+      summary: map
+      list_of_differences: map
+      num_paragraph: map
+
+  PC:
+    table_train: master_pc_train # training master
+    columns:
+      DATA_SNAPSHOT: date
+      macrosegmento: string
+      commodity: string
+      document_type: string
+      current_campaign: string
+      current_file_name: string
+      past_campaign: string
+      past_file_name: string
+      chunk: string
+      chunk_title: string
+      stop_words: map
+      extracted_chunk: string
+      extracted_chunk_clean: string
+      token_count: integer
+      chunk_check: boolean
+      corresponding_contractual_paragraphs: map
+      comparison_lists: map
+      comparison: integer
+      summary: map
+      list_of_differences: map
+      num_paragraph: map
+# ---------------------------------------------------------------------------- #
+#                      Models, tuning, mlflow, and related                     #
+# ---------------------------------------------------------------------------- #

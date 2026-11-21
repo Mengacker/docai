@@ -1,0 +1,147 @@
+# ---------------------------------------------------------------------------- #
+#                         ASSET BUNDLES CONFIGURATIONS                         #
+# ---------------------------------------------------------------------------- #
+
+# The name of the bundle. run `databricks bundle schema` to see the full bundle settings schema.
+bundle:
+  name: documental_check_ai # docai
+
+# Assets folder containing ML artifact-assets and workflows-assets for the ml project
+include:
+  - ./assets/*.yml
+
+# Deafault sync root is where this fie is located, thus is necessary to add notebooks folder
+sync:
+  paths:
+    - ../notebooks/
+    - ../src/
+
+# Custom variables which can be called elsewhere in the yamls
+variables:
+  snapshot_date:
+    description: Data snapshot da usare per la run
+    default: "{{job.trigger.time.[iso_date]}}"
+
+  experiment_description:
+    description: Description for the experiment
+    default: "Experiment used to track model training"
+
+  job_trigger:
+    description: Path to use to trigger the master creation
+    default: /Volumes/.../Campagne/
+
+  init_script_path:
+    description: Path to the init script
+    default: /src/init_scripts/extra_index_url.sh
+
+  sp_user:
+    description: Service principle used to access the workspace
+    default: sp
+
+  email_settings:
+    description: Settings for email notifications
+    type: complex
+    default:
+      on_failure:
+      on_success:
+
+  my_permissions:
+    description: Permissions configurations
+    type: complex
+    default:
+      - level: CAN_VIEW
+        group_name: users
+
+  my_tags:
+    description: Tags for the jobs
+    type: complex
+    default:
+      use_case: ${bundle.name}
+      git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+  master_cluster:
+    description: Cluster to use for most of the task, little executors, standard driver
+    type: complex
+    default:
+      spark_version: 15.4.x-cpu-ml-scala2.12
+      node_type_id: Standard_D8a_v4
+      driver_node_type_id: Standard_E16_v3
+      autoscale:
+        min_workers: 1
+        max_workers: 6
+      spark_env_vars:
+        PYPI_TOKEN: "{{secrets/mlops/pypitoken}}"
+      init_scripts:
+        - workspace:
+            destination: ${var.init_script_path}
+      spark_conf:
+        spark.databricks.delta.preview.enabled: true
+        spark.databricks.delta.optimizeWrite.enabled: true
+        spark.databricks.delta.autoCompact.enabled: true
+        spark.driver.extraJavaOptions: "-Dio.netty.tryReflectionSetAccessible=true"
+        # Enable delta caching
+        spark.databricks.io.cache.maxDiskUsage: 50g
+        spark.databricks.io.cache.maxMetaDataCache: 1g
+        spark.databricks.io.cache.compression.enabled: false
+        spark.databricks.io.cache.enabled: true
+      custom_tags:
+        clusterSource: mlops-stack/0.2
+
+  tuning_cluster:
+    description: Cluster to use for tuning and ray, no autoscaling. Driver and executors bigger.
+    type: complex
+    default:
+      num_workers: 4
+      spark_version: 15.4.x-cpu-ml-scala2.12
+      node_type_id: Standard_D8a_v4
+      driver_node_type_id: Standard_D16_v3
+      spark_env_vars:
+        PYPI_TOKEN: "{{secrets/mlops/pypitoken}}"
+      init_scripts:
+        - workspace:
+            destination: ${var.init_script_path}
+      spark_conf:
+        spark.databricks.delta.preview.enabled: true
+        spark.databricks.delta.optimizeWrite.enabled: true
+        spark.databricks.delta.autoCompact.enabled: true
+        spark.driver.extraJavaOptions: "-Dio.netty.tryReflectionSetAccessible=true"
+        spark.scheduler.mode: "FAIR"
+        # Enable delta caching
+        spark.databricks.io.cache.maxDiskUsage: 50g
+        spark.databricks.io.cache.maxMetaDataCache: 1g
+        spark.databricks.io.cache.compression.enabled: false
+        spark.databricks.io.cache.enabled: true
+      custom_tags:
+        clusterSource: mlops-stack/0.2
+
+# Permissions and grants (apply to exp, jobs, models and pipeline)
+permissions: ${var.my_permissions}
+
+# Defines resources common settings (jobs defined in specific yamls)
+#resources:
+#experiments:
+#experiment:
+#name: ${var.experiment_name}
+#description: ${var.experiment_description} ##TODO
+
+# ---------------------------------------------------------------------------- #
+#             DO NOT MODIFY THIS SECTION UNLESS STRICTLY NECESSARY             #
+# ---------------------------------------------------------------------------- #
+# Deployment Target-specific values for workspace
+targets:
+  dev:
+    default: true
+    workspace:
+      #TODO: add dev workspace URL
+      host: https://....azuredatabricks.net
+
+  staging:
+    workspace:
+      host: https://....azuredatabricks.net
+
+  prod:
+    workspace:
+      host: https://....azuredatabricks.net
+
+  test:
+    workspace:
+      host: https://....azuredatabricks.net
